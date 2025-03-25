@@ -30,6 +30,7 @@ public class PaymentClient {
 
     /**
      * Get Access Token
+     *
      * @return Access token as String
      */
     public Map getAccessToken() {
@@ -57,34 +58,31 @@ public class PaymentClient {
 
     public String cancelPayment(String impUid) {
 
-        String accessToken = ((LinkedHashMap)getAccessToken().get("response")).get("access_token").toString();
+        String accessToken = ((LinkedHashMap) getAccessToken().get("response")).get("access_token").toString();
 
         String url = BASE_URL + PortOneRequestUrl.CANCEL_PAYMENT_URL.getUrl();
-        String requestBody = String.format("{\"imp_uid\": \"%s\"}",impUid);
+        String requestBody = String.format("{\"imp_uid\": \"%s\"}", impUid);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(accessToken);
 
-        if(true) {
-            throw new RestClientException("Forced RestClientException for testing");
-        }else {
-            // Send POST request
-            return restClient
-                    .post()
-                    .uri(url)
-                    .headers(h -> h.addAll(headers))
-                    .body(requestBody)
-                    .retrieve()
-                    .body(String.class);
-        }
+        // Send POST request
+        return restClient
+                .post()
+                .uri(url)
+                .headers(h -> h.addAll(headers))
+                .body(requestBody)
+                .retrieve()
+                .body(String.class);
     }
 
 
     /**
      * Create Payment (Example: if you want to add payment creation)
+     *
      * @param paymentRequest Payment request data
-     * @param token Access token
+     * @param token          Access token
      * @return Response from PortOne API
      */
     public String createPayment(String paymentRequest, String token) {
