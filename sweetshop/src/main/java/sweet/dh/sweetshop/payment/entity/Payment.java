@@ -1,14 +1,13 @@
-package sweet.dh.sweetshop.entity;
+package sweet.dh.sweetshop.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sweet.dh.sweetshop.entity.requset.PaymentReq;
+import sweet.dh.sweetshop.payment.entity.requset.PaymentReq;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
