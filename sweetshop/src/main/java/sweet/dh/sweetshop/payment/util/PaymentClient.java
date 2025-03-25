@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -56,6 +60,12 @@ public class PaymentClient {
         }
     }
 
+    @Retryable(
+            value = RestClientException.class,  // 재시도할 예외 지정
+            maxAttempts = 2,                    // 최초 호출 1회 + 재시도 1회
+            backoff = @Backoff(delay = 1000),    // 1초 대기 후 재시도
+            recover = "handlePaymentCancellationFailure"
+    )
     public String cancelPayment(String impUid) {
 
         String accessToken = ((LinkedHashMap) getAccessToken().get("response")).get("access_token").toString();
@@ -75,6 +85,16 @@ public class PaymentClient {
                 .body(requestBody)
                 .retrieve()
                 .body(String.class);
+    }
+
+    //재시도까지 실패 시 대체 프로세스
+    @Recover
+    public String handlePaymentCancellationFailure(RestClientException e, String impUid) {
+        log.error("RestClientException 예외로 인해 실패: {}", e.getClass().getName());
+        // 실패에 대한 처리 로직 구현 필요.
+        // 사전작업에서 처리한 디비 수정값 등의 데이터들을 원복 처리
+        // 담당자(개발자,운영자,기획자)에서 해당 이슈를 전달 - email , team 메신저 webhook 처리
+        return HttpStatus.INTERNAL_SERVER_ERROR.toString(); // 실패 후 대체 반환 값
     }
 
 
