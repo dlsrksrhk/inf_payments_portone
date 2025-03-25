@@ -43,17 +43,17 @@ function paymentProcess() {
                     return alert(`결제에 실패하였습니다. 에러 내용: ${response.error_msg}`);
                 }
 
-                // 고객사 서버에서 /payment/complete 엔드포인트를 구현해야 합니다.
-                // (다음 목차에서 설명합니다)
-                // const notified = await fetch(`${SERVER_BASE_URL}/payment/complete`, {
-                //     method: "POST",
-                //     headers: { "Content-Type": "application/json" },
-                //     // imp_uid와 merchant_uid, 주문 정보를 서버에 전달합니다
-                //     body: JSON.stringify({
-                //         imp_uid: response.imp_uid,
-                //         merchant_uid: response.merchant_uid,
-                //     }),
-                // });
+                //결제 완료시 필요한 데이터 추가
+                response.partnerId = 12345;  // partnerId 값 설정 (필요시 동적으로 가져올 수 있음)
+                response.userId = 67890;     // userId 값 설정 (현재 로그인한 사용자 정보로 설정 가능)
+                response.orderId = 112233;   // orderId 값 설정 (주문 관련 정보로 설정 가능)
+                response.paymentDate = new Date().toISOString().split('T')[0];  // paymentDate를 현재 날짜로 설정 (yyyy-mm-dd 형식)
+                const notified = await fetch(`/api/payment/portone`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    // imp_uid와 merchant_uid, 주문 정보를 서버에 전달합니다
+                    body: JSON.stringify(response),
+                });
             });
         } else { // 비회원 결제 불가
             alert('로그인이 필요합니다!')
