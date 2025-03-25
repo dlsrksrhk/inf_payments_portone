@@ -3,6 +3,8 @@ package sweet.dh.sweetshop.settlement.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sweet.dh.sweetshop.payment.entity.Payment;
@@ -11,6 +13,8 @@ import sweet.dh.sweetshop.settlement.entity.Settlement;
 import sweet.dh.sweetshop.settlement.repository.SettlementRepository;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,6 +32,8 @@ public class SettlementScheduledTasks {
 
     private final SettlementRepository settlementRepository;
 
+    private final JdbcTemplate jdbcTemplate;
+
     //1분마다
     @Scheduled(cron = "0 * * * * ?")
     @SchedulerLock(name = "ScheduledTask_run")
@@ -42,7 +48,8 @@ public class SettlementScheduledTasks {
         // 해당 기간 동안의 결제 내역 조회 및 집계
         Map<Long, BigDecimal> settlementMap = getSettlementMap(startDate, endDate);
 
-        processSettlements(settlementMap, yesterday);
+//        processSettlements(settlementMap, yesterday);
+        bulkProcessSettlements(settlementMap, yesterday);
     }
 
     private Map<Long, BigDecimal> getSettlementMap(LocalDateTime startDate, LocalDateTime endDate) {
@@ -76,5 +83,26 @@ public class SettlementScheduledTasks {
         } finally {
             customForkJoinPool.shutdown();
         }
+    }
+
+    private void bulkProcessSettlements(Map<Long, BigDecimal> settlementMap, LocalDate paymentDate) {
+        String sql = "INSERT INTO settlements (partner_id, total_amount, payment_date) VALUES (?, ?, ?)";
+
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Long partnerId = (Long) settlementMap.keySet().toArray()[i];
+                BigDecimal amount = settlementMap.get(partnerId);
+
+                ps.setLong(1, partnerId);
+                ps.setBigDecimal(2, amount);
+                ps.setObject(3, paymentDate);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return settlementMap.size();
+            }
+        });
     }
 }
