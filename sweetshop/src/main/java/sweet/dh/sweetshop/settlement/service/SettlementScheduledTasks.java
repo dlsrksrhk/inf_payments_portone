@@ -2,6 +2,7 @@ package sweet.dh.sweetshop.settlement.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import sweet.dh.sweetshop.payment.entity.Payment;
@@ -28,6 +29,7 @@ public class SettlementScheduledTasks {
 
     //1분마다
     @Scheduled(cron = "0 * * * * ?")
+    @SchedulerLock(name = "ScheduledTask_run")
     public void dailySettlement() {
         // 어제의 날짜를 가져옴
         LocalDate yesterday = LocalDate.now().minusDays(1);
