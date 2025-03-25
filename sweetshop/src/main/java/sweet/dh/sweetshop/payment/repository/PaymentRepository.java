@@ -1,9 +1,9 @@
-package sweet.dh.sweetshop.repository;
+package sweet.dh.sweetshop.payment.repository;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import sweet.dh.sweetshop.entity.Payment;
+import sweet.dh.sweetshop.payment.entity.Payment;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,12 +1,11 @@
 package sweet.dh.sweetshop.payment.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import sweet.dh.sweetshop.entity.Payment;
-import sweet.dh.sweetshop.entity.requset.PaymentReq;
-import sweet.dh.sweetshop.service.PaymentService;
+import sweet.dh.sweetshop.payment.entity.Payment;
+import sweet.dh.sweetshop.payment.entity.requset.PaymentReq;
+import sweet.dh.sweetshop.payment.service.PaymentService;
 
 import java.util.List;
 
@@ -38,6 +37,12 @@ public class PaymentController {
     public ResponseEntity<List<Payment>> getAllPayments() {
         List<Payment> payments = paymentService.getAllPayments();
         return ResponseEntity.ok(payments);
+    }
+
+    @GetMapping("/cancle/{uid}")
+    public ResponseEntity<String> canclePayment(@PathVariable("uid")String uid) {
+        paymentService.canclePayment(uid);
+        return ResponseEntity.ok("Payment cancle processed successfully.");
     }
 
 }

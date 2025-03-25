@@ -1,4 +1,4 @@
-package sweet.dh.sweetshop.entity.requset;
+package sweet.dh.sweetshop.payment.entity.requset;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
