@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -59,9 +60,21 @@ public class SettlementScheduledTasks {
     }
 
     private void processSettlements(Map<Long, BigDecimal> settlementMap, LocalDate paymentDate) {
-        //결제내역 일별 그룹핑 후 집계
-        settlementMap.entrySet().stream()
-                .map(entry -> Settlement.create(entry.getKey(), entry.getValue(), paymentDate))
-                .forEach(settlementRepository::save);
+        //공유풀을 사용하지 않고 별도의 스레드풀을 만들어 병렬스트림 수행
+        //Runtime.getRuntime().availableProcessors() 대신에 직접 스레드 수 조절 가능
+        ForkJoinPool customForkJoinPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
+
+        try {
+            customForkJoinPool.submit(() ->
+                    //결제내역 일별 그룹핑 후 집계
+                    settlementMap.entrySet().parallelStream()
+                            .map(entry -> Settlement.create(entry.getKey(), entry.getValue(), paymentDate))
+                            .forEach(settlementRepository::save)
+            ).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            customForkJoinPool.shutdown();
+        }
     }
 }
