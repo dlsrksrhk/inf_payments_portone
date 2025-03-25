@@ -28,7 +28,7 @@ public class PaymentInsertTest {
     @Test
     public void insertDummyPayments() {
         for (int i = 0; i < 2000; i++) {
-            Long partnerId = ThreadLocalRandom.current().nextLong(10000, 99999);
+            Long partnerId = ThreadLocalRandom.current().nextLong(10000, 10500);
             long userId = ThreadLocalRandom.current().nextLong(10000, 99999);
             long orderId = ThreadLocalRandom.current().nextLong(100000, 999999);
             double paymentAmount = Math.round(ThreadLocalRandom.current().nextDouble(1000, 300000) * 100.0) / 100.0;
@@ -70,6 +70,11 @@ public class PaymentInsertTest {
         int hour = ThreadLocalRandom.current().nextInt(0, 24);
         int minute = ThreadLocalRandom.current().nextInt(0, 60);
         int second = ThreadLocalRandom.current().nextInt(0, 60);
-        return LocalDateTime.of(2025, 3, day, hour, minute, second);
+//        return LocalDateTime.of(2025, 3, day, hour, minute, second);
+        return LocalDateTime.now()
+                .minusDays(1)
+                .withHour(hour)
+                .withMinute(minute)
+                .withSecond(second);
     }
 }
