@@ -67,7 +67,7 @@ public class PaymentClient {
             recover = "handlePaymentCancellationFailure"
     )
     public String cancelPayment(String impUid) {
-
+        log.info("Canceling payment with impUid: {}", impUid);
         String accessToken = ((LinkedHashMap) getAccessToken().get("response")).get("access_token").toString();
 
         String url = BASE_URL + PortOneRequestUrl.CANCEL_PAYMENT_URL.getUrl();
